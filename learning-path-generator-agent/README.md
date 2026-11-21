@@ -17,9 +17,9 @@ An autonomous **n8n AI Agent** that takes any learning goal via chat (e.g., *"Ge
 ## 📄 Sample Execution (`"Generate 2 days roadmap for JS"`)
 
 * **Generated Curriculum Document:** *2-Day JavaScript Learning Path*
-  ![Sample Google Doc Curriculum](./sample-doc-output.png)
+  ![Sample Google Doc Curriculum](./sample-docs-roadmap.png)
 * **Scheduled Study Blocks:** 2 daily 2-hour sessions added to Google Calendar
-  ![Sample Google Calendar Events](./sample-calendar-output.png)
+  ![Sample Google Calendar Events](./sample-calender-schedule.png)
 
 ## 🔑 Required Credentials & API Keys
 
