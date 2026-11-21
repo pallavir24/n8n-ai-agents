@@ -1,0 +1,260 @@
+{
+  "name": "Learning Path Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "Coffee"
+            },
+            {
+              "name": "location",
+              "value": "Austin, Texas, United States"
+            },
+            {
+              "name": "google_domain",
+              "value": "google.com"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            },
+            {
+              "name": "gl",
+              "value": "us"
+            },
+            {
+              "name": "api_key",
+              "value": "YOUR_SERPAPI_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        224
+      ],
+      "id": "83f715d2-b81a-41e1-b7da-aac41437bf0d",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "Automation"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        224
+      ],
+      "id": "475d177e-b1df-405e-a80f-ab0b2ba64037",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hS6AcGDgOY3SOlQf",
+          "name": "Google Calendar account 1891"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "~deepseek/deepseek-v4-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        224,
+        208
+      ],
+      "id": "69c3848c-88fe-4e03-9c7d-fe0eb16aac8a",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "WbJkiojtskTHyw3E",
+          "name": "OpenRouter account 5015"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a day-wise learning path generator. When given a learning goal, create a structured curriculum in Google Docs and schedule day-wise events in Google Calendar.\n\nCONTEXT & CURRENT DATE:\n- Today's date is {{ $now.toFormat('yyyy-MM-dd') }} (Day: {{ $now.toFormat('cccc') }}).\n- Default timezone is Asia/Kolkata (+05:30).\n\nSTEP 1: PLAN THE CURRICULUM\n- Break the requested topic into [X] days, progressing from beginner to advanced.\n- Give each day a clear, focused topic name.\n\nSTEP 2: DETERMINE START DATE\n- If the user specifies \"starting tomorrow\" -> use tomorrow's date ({{ $now.plus({ days: 1 }).toFormat('yyyy-MM-dd') }}).\n- If the user specifies \"starting next Monday\" -> calculate the upcoming Monday after today.\n- If the user specifies \"starting from [date]\" -> use that exact date in YYYY-MM-DD format.\n- If NO start date is mentioned -> START_DATE is TODAY ({{ $now.toFormat('yyyy-MM-dd') }}).\n- Never default to past years such as 2024 unless explicitly requested by the user.\n\nSTEP 3: RESEARCH RESOURCES\nRun 2-3 searches using your search tool and extract real, complete https:// URLs:\n- Search \"[Topic] beginner tutorial\" -> extract an actual article URL starting with https://\n- Search \"[Topic] official documentation\" -> extract an actual documentation URL starting with https://\n- Search \"[Topic] YouTube course\" -> extract an actual YouTube URL starting with https://www.youtube.com/\nDo not invent or guess URLs, and do not substitute article titles in place of URLs.\n\nSTEP 4: CREATE DOCUMENT\n- Create a new Google Doc titled \"[X]-Day [Topic] Learning Path\".\n- Save the created document ID and URL from the tool output.\n\nSTEP 5: UPDATE DOCUMENT WITH CONTENT AND URLS\nPopulate the document using this exact structure for every day:\n\nDay 1: [Topic Name]\nDescription: [2-3 clear sentences explaining what will be covered and why it matters.]\nKey Learning Points:\n- [Point 1]\n- [Point 2]\n- [Point 3]\nReference Links:\nVideo: [https://www.youtube.com/...]\nArticle: [https://...]\nDocumentation: [https://...]\nDuration: 2 hours\n\nRepeat for all [X] days. Every reference line must contain a complete https:// URL.\n\nSTEP 6: CREATE CALENDAR EVENTS\nFor each day from Day 1 to Day X:\n- Calculate the event date: Day 1 = START_DATE, Day 2 = START_DATE + 1 day, and so on.\n- Event Summary / Title: \"Day X: [Topic Name]\"\n- Start Time: [YYYY-MM-DD]T11:00:00+05:30\n- End Time: [YYYY-MM-DD]T13:00:00+05:30\n- Description: Include the day's key learning points and all https:// reference links (Video, Article, Documentation).\n\nSTEP 7: FINAL OUTPUT\nRespond strictly in this format:\nLearning Path Complete!\nDocument: [Google Docs URL]\nCalendar: I've added [X] events from [START_DATE] to [END_DATE] at 11:00 AM.\nYour [X]-day [topic] learning journey is ready!\n\nCRITICAL RULES:\n- Always use {{ $now.toFormat('yyyy-MM-dd') }} as today's reference date when no start date is given.\n- Every reference link in both Google Docs and Google Calendar descriptions must start with https:// (no link titles instead of URLs).\n- Pass full ISO 8601 datetime strings with +05:30 offset for calendar start and end times."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "f2c82877-d0bd-490d-8c80-53c580df176f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "folderId": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        720,
+        224
+      ],
+      "id": "91bc74a5-9eb2-4ecc-a639-6773effdb5ba",
+      "name": "Create a document in Google Docs1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "g7c6to1VOB7MnIp9",
+          "name": "Google Docs account 2277"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        928,
+        224
+      ],
+      "id": "01e2d472-4a43-4ec1-87b5-3b758471c0d6",
+      "name": "Update a document in Google Docs1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "g7c6to1VOB7MnIp9",
+          "name": "Google Docs account 2277"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "96c19292-f082-4d00-ba86-89402124b231",
+      "name": "When chat message received",
+      "webhookId": "8cce2ba6-5ffd-4a26-b828-13992afea6e3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document in Google Docs1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document in Google Docs1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a8dffb74-892f-4879-ab7c-2d5d416cf417",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "yF2So1wdjxCERmJQ",
+  "tags": []
+}
