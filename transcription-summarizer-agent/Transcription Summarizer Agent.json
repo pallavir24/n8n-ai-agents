@@ -1,0 +1,269 @@
+{
+  "name": "Transcription Summarizer Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -496,
+        -32
+      ],
+      "id": "541aa6df-5212-499a-bd84-5b49a17d6347",
+      "name": "When chat message received",
+      "webhookId": "2ac0b6d2-ec94-41d7-a246-77f74f56936d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "You are a document processor and summarizer. Your job is to create a document with original content and summary, then return the summary content to the user.\nStep-by-Step Execution Flow:\n\nCreate Document: Use \"Create document\" tool to create a new Google Doc\nAdd Original Content: Use \"Update document\" tool to add the user's provided text\nGenerate Summary: Analyze the content and create a comprehensive summary with bullet points covering:\n• Key themes and main points\n• Important details and insights\n• Action items or next steps\n• Conclusions and recommendations\n• Notable data or statistics\nAdd Summary to Document: Use \"Update document\" tool again to append the summary section to the document\nRetrieve Final Content: Use \"get document\" tool to fetch the complete document content including both original text and summary\nReturn Summary: Extract and return the summary portion from the retrieved document content to the user\n\nImportant Instructions:\n\nAlways use \"get document\" at the end to retrieve the full content\nExtract and display the summary section in your response to the user\nProvide both the document link AND the summary content in your output\nFormat the summary clearly with bullet points for easy reading\n\nOutput Format:\n\"Here is your document: [link]\nSUMMARY:\n\nPoint 1\nPoint 2\nPoint 3\n[etc.]\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        128,
+        -32
+      ],
+      "id": "91b80baa-c11d-41a2-9f76-31812d6b824d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -288,
+        -32
+      ],
+      "id": "781f8c32-4268-486c-91f4-6214c05c8a11",
+      "name": "Download Video"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-large-v3"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        -32
+      ],
+      "id": "0bb0f804-56b7-4f80-8bdf-8371b99eb9ba",
+      "name": "Groq API - Audio Translations"
+    },
+    {
+      "parameters": {
+        "folderId": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        448,
+        160
+      ],
+      "id": "99904d0a-2ac1-4a0a-bf93-39798024b899",
+      "name": "Create a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "g7c6to1VOB7MnIp9",
+          "name": "Google Docs account 2277"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        624,
+        160
+      ],
+      "id": "23eb903e-9d79-4ab5-9f3a-6e85148672f2",
+      "name": "Update a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "g7c6to1VOB7MnIp9",
+          "name": "Google Docs account 2277"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        176
+      ],
+      "id": "415bcb26-ce36-4242-99f0-a49cd67990c1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mKh6fXlqOpusHgMA",
+          "name": "Google Gemini(PaLM) Api account 105609"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        816,
+        160
+      ],
+      "id": "da9d6f36-1235-4d82-a062-661bec9a6598",
+      "name": "Get a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "g7c6to1VOB7MnIp9",
+          "name": "Google Docs account 2277"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video": {
+      "main": [
+        [
+          {
+            "node": "Groq API - Audio Translations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq API - Audio Translations": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4cb93433-e209-4e8c-981c-08149a5688d8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "yF2So1wdjxCERmJQ",
+  "tags": []
+}
