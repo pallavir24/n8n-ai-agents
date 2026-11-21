@@ -2,7 +2,7 @@
 
 An autonomous **n8n AI Agent** that accepts a video or audio URL via chat, transcribes the spoken content using **Groq (`whisper-large-v3`)**, and orchestrates a 4-step **Google Docs** tool-calling sequence powered by **Google Gemini (`gemini-3.1-flash-lite`)** to archive the full transcript, append a structured summary, verify the final document, and return both the live Google Doc link and key takeaways in chat.
 
-![Workflow Canvas](./workflow-canvas.png)
+![Workflow Canvas](./workflow.png)
 
 ## ⚙️ How It Works
 
