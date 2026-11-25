@@ -19,7 +19,7 @@ An autonomous **n8n AI Agent** integrated with **Telegram** that dynamically rou
 
 | Calculator Tool (`25 * 48 + 120`) | Wikipedia Tool (`Alan Turing`) | SerpAPI Tool (`ISRO Missions`) | Google Calendar Tools |
 | :---: | :---: | :---: | :---: |
-| ![Calculator Test](./sample-calculator.png) | ![Wikipedia Test](./sample-wikipedia.png) | ![SerpAPI Search](./sample-search.png) | ![Calendar Actions](./sample-calendar.png) |
+| ![Calculator Test](./sample-calculator-output.png) | ![Wikipedia Test](./sample-wikipedia-output.png) | ![SerpAPI Search](./sample-serpAPI-output.png) | ![Calendar Actions](./sample-calender-schedule.png) |
 
 ## 🔑 Required Credentials & API Keys
 
